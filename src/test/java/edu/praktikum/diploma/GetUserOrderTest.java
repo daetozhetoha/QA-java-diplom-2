@@ -12,6 +12,7 @@ import io.qameta.allure.Step;
 import io.qameta.allure.junit4.DisplayName;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -149,5 +150,14 @@ public class GetUserOrderTest extends Url {
     @Step("Compare body parameter 'message' for 401 status with response")
     public void compareParameterMessageFor401WithResponse(Response response) {
         response.then().assertThat().body("message", equalTo("You should be authorised"));
+    }
+
+    @After
+    public void tearTest() {
+        Response loginResponse = userClient.login(UserCreds.credsFromUser(user));
+        accessToken = loginResponse.jsonPath().getString("accessToken");
+        if (accessToken != null && !accessToken.isEmpty()) {
+            userClient.delete(accessToken);
+        }
     }
 }
